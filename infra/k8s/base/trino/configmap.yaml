@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-config
+  namespace: trino
+data:
+  node.properties: |
+    node.environment=production
+    node.id=ffffffff-ffff-ffff-ffff-ffffffffffff
+    node.data-dir=/data/trino
+
+  jvm.config: |
+    -server
+    -Xmx1536m
+    -XX:+UseG1GC
+    -XX:G1HeapRegionSize=32M
+    -XX:+ExplicitGCInvokesConcurrent
+    -XX:+ExitOnOutOfMemoryError
+    -Djdk.attach.allowAttachSelf=true
+
+  config.properties: |
+    coordinator=true
+    node-scheduler.include-coordinator=true
+    http-server.http.port=8080
+    query.max-memory=1GB
+    query.max-memory-per-node=512MB
+    discovery.uri=http://localhost:8080
+
+  iceberg.properties: |
+    connector.name=iceberg
+    iceberg.catalog.type=rest
+    iceberg.rest-catalog.uri=http://gravitino.gravitino.svc.cluster.local:9001/iceberg/
+    iceberg.file-format=PARQUET
+    fs.native-s3.enabled=true
+    s3.endpoint=http://minio.minio.svc.cluster.local:9000
+    s3.aws-access-key=admin
+    s3.aws-secret-key=password123
+    s3.path-style-access=true
+    s3.region=us-east-1
+
+  postgres.properties: |
+    connector.name=postgresql
+    connection-url=jdbc:postgresql://postgres.postgres.svc.cluster.local:5432/banking
+    connection-user=postgres
+    connection-password=postgres123

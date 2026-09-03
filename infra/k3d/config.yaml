@@ -1,0 +1,50 @@
+# k3d cluster configuration (Schema: k3d.io/v1alpha5)
+# Run: k3d cluster create --config infra/k3d/config.yaml
+
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: bigdata-dev
+servers: 1
+agents: 2
+image: rancher/k3s:v1.28.8-k3s1
+
+ports:
+  # MinIO API (S3)
+  - port: 9000:9000
+    nodeFilters:
+      - loadbalancer
+  # MinIO Console (Web UI)
+  - port: 9001:9001
+    nodeFilters:
+      - loadbalancer
+  # PostgreSQL
+  - port: 5432:5432
+    nodeFilters:
+      - loadbalancer
+  # Spark UI / Driver
+  - port: 4040:4040
+    nodeFilters:
+      - loadbalancer
+  # Apache Gravitino Web UI & REST API
+  - port: 8090:8090
+    nodeFilters:
+      - loadbalancer
+
+volumes:
+  # Docker named volume for local-path storage persistence
+  - volume: k3d-storage:/var/lib/rancher/k3s/storage@all
+
+options:
+  k3d:
+    wait: true
+    timeout: "180s"
+    disableLoadbalancer: false
+  k3s:
+    extraArgs:
+      - arg: --disable=traefik
+        nodeFilters:
+          - server:*
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true

@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: postgres
+data:
+  01-init-databases.sql: |
+    CREATE USER metastore WITH ENCRYPTED PASSWORD 'metastore123';
+    CREATE DATABASE metastore OWNER metastore;
+    GRANT ALL PRIVILEGES ON DATABASE metastore TO metastore;
+    \c metastore
+    GRANT ALL ON SCHEMA public TO metastore;
+
+    \c postgres
+    CREATE USER airflow WITH ENCRYPTED PASSWORD 'airflow123';
+    CREATE DATABASE airflow OWNER airflow;
+    GRANT ALL PRIVILEGES ON DATABASE airflow TO airflow;
+
+    CREATE DATABASE banking;
+
+    CREATE USER gravitino WITH ENCRYPTED PASSWORD 'gravitino123';
+    CREATE DATABASE gravitino OWNER gravitino;
+    GRANT ALL PRIVILEGES ON DATABASE gravitino TO gravitino;
+    \c gravitino
+    GRANT ALL ON SCHEMA public TO gravitino;

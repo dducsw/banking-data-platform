@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: spark
+
+configMapGenerator:
+  - name: spark-job-read-postgres
+    files:
+      - spark_read_postgres.py=../../../src/pipeline/example/spark_read_postgres.py
+  - name: spark-job-write-iceberg
+    files:
+      - spark_write_iceberg.py=../../../src/pipeline/example/spark_write_iceberg.py
+
+resources:
+  - job-spark-read-postgres.yaml
+  - job-spark-write-iceberg.yaml

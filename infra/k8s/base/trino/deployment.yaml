@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trino
+  namespace: trino
+  labels:
+    app: trino
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trino
+  template:
+    metadata:
+      labels:
+        app: trino
+    spec:
+      initContainers:
+        - name: wait-for-gravitino
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z gravitino.gravitino.svc.cluster.local 9001; do echo waiting for gravitino iceberg-rest; sleep 2; done;']
+        - name: wait-for-minio
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z minio.minio.svc.cluster.local 9000; do echo waiting for minio; sleep 2; done;']
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command: ['sh', '-c', 'until nc -z postgres.postgres.svc.cluster.local 5432; do echo waiting for postgres; sleep 2; done;']
+      containers:
+        - name: trino
+          image: trinodb/trino:480
+          ports:
+            - containerPort: 8080
+              name: http
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/trino/node.properties
+              subPath: node.properties
+            - name: config-volume
+              mountPath: /etc/trino/jvm.config
+              subPath: jvm.config
+            - name: config-volume
+              mountPath: /etc/trino/config.properties
+              subPath: config.properties
+            - name: config-volume
+              mountPath: /etc/trino/catalog/iceberg.properties
+              subPath: iceberg.properties
+            - name: config-volume
+              mountPath: /etc/trino/catalog/postgres.properties
+              subPath: postgres.properties
+          readinessProbe:
+            httpGet:
+              path: /v1/info
+              port: 8080
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /v1/info
+              port: 8080
+            initialDelaySeconds: 35
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: "1536Mi"
+              cpu: "300m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1500m"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: trino-config

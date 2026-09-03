@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-config
+  namespace: clickhouse
+  labels:
+    app.kubernetes.io/name: clickhouse
+    app.kubernetes.io/part-of: data-platform
+data:
+  listen.xml: |
+    <clickhouse>
+        <listen_host>0.0.0.0</listen_host>
+        <http_port>8123</http_port>
+        <tcp_port>9000</tcp_port>
+        <mysql_port>9004</mysql_port>
+        <postgresql_port>9005</postgresql_port>
+        <interserver_http_port>9009</interserver_http_port>
+        <max_connections>1024</max_connections>
+        <keep_alive_timeout>10</keep_alive_timeout>
+    </clickhouse>
+
+  s3_minio.xml: |
+    <clickhouse>
+        <named_collections>
+            <s3_lakehouse>
+                <endpoint>http://minio.minio.svc.cluster.local:9000/lakehouse/</endpoint>
+                <access_key_id>admin</access_key_id>
+                <secret_access_key>password123</secret_access_key>
+                <structure>auto</structure>
+            </s3_lakehouse>
+        </named_collections>
+    </clickhouse>
+
+  user_profiles.xml: |
+    <clickhouse>
+        <profiles>
+            <default>
+                <max_memory_usage>1000000000</max_memory_usage>
+                <use_uncompressed_cache>0</use_uncompressed_cache>
+                <load_balancing>random</load_balancing>
+            </default>
+        </profiles>
+    </clickhouse>

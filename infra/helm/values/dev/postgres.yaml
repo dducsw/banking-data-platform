@@ -1,0 +1,24 @@
+# Bitnami PostgreSQL values for local dev (k3d)
+# Repo: https://charts.bitnami.com/bitnami
+# Chart: bitnami/postgresql
+
+global:
+  postgresql:
+    auth:
+      postgresPassword: "postgrespassword"
+      username: "postgres"
+      password: "postgrespassword"
+      database: "banking"
+
+primary:
+  persistence:
+    enabled: true
+    storageClass: "local-path"
+    size: 2Gi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

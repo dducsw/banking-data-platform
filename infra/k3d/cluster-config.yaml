@@ -1,0 +1,44 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: data-platform
+servers: 1
+agents: 2
+image: rancher/k3s:v1.28.8-k3s1
+ports:
+  - port: 9000:9000 # MinIO API
+    nodeFilters:
+      - server:0
+  - port: 9001:9001 # MinIO Console
+    nodeFilters:
+      - server:0
+  - port: 8080:8080 # Trino UI
+    nodeFilters:
+      - server:0
+  - port: 8088:8088 # Airflow Webserver
+    nodeFilters:
+      - server:0
+  - port: 8089:8089 # Superset Web UI
+    nodeFilters:
+      - server:0
+  - port: 3000:3000 # Grafana UI
+    nodeFilters:
+      - server:0
+  - port: 9090:9090 # Prometheus UI
+    nodeFilters:
+      - server:0
+  - port: 8123:8123 # ClickHouse HTTP
+    nodeFilters:
+      - server:0
+  - port: 9092:9092 # Kafka External (if needed)
+    nodeFilters:
+      - server:0
+options:
+  k3s:
+    extraArgs:
+      - arg: --disable=traefik
+        nodeFilters:
+          - server:*
+      - arg: --disable=metrics-server
+        nodeFilters:
+          - server:*

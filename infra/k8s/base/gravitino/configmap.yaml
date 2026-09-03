@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gravitino-config
+  namespace: gravitino
+data:
+  gravitino.conf: |
+    # ── Apache Gravitino Server Configuration ──────────────────────────────────
+    gravitino.server.shutdown.timeout = 3000
+
+    # ── Web Server & REST API ──────────────────────────────────────────────────
+    gravitino.server.webserver.host = 0.0.0.0
+    gravitino.server.webserver.httpPort = 8090
+    gravitino.server.webserver.minThreads = 24
+    gravitino.server.webserver.maxThreads = 200
+    gravitino.server.webserver.stopTimeout = 30000
+    gravitino.server.webserver.idleTimeout = 30000
+
+    # ── Entity Store (Relational JDBC Backend with PostgreSQL) ──────────────────
+    gravitino.entity.store = relational
+    gravitino.entity.store.relational = JDBCBackend
+    gravitino.entity.store.relational.jdbcUrl = jdbc:postgresql://postgres.postgres.svc.cluster.local:5432/gravitino
+    gravitino.entity.store.relational.jdbcDriver = org.postgresql.Driver
+    gravitino.entity.store.relational.jdbcUser = postgres
+    gravitino.entity.store.relational.jdbcPassword = postgres123
+
+    # ── Cache Configuration ────────────────────────────────────────────────────
+    gravitino.cache.enabled = true
+    gravitino.cache.maxEntries = 10000
+    gravitino.cache.expireTimeInMs = 3600000
+
+    # ── Auxiliary Service: Iceberg REST Catalog ────────────────────────────────
+    gravitino.auxService.names = iceberg-rest
+    gravitino.iceberg-rest.classpath = iceberg-rest-server/libs, iceberg-rest-server/conf
+    gravitino.iceberg-rest.host = 0.0.0.0
+    gravitino.iceberg-rest.httpPort = 9001
+
+    # Iceberg Catalog Backend: PostgreSQL JDBC
+    gravitino.iceberg-rest.catalog-backend = jdbc
+    gravitino.iceberg-rest.jdbc-driver = org.postgresql.Driver
+    gravitino.iceberg-rest.uri = jdbc:postgresql://postgres.postgres.svc.cluster.local:5432/gravitino
+    gravitino.iceberg-rest.jdbc-user = postgres
+    gravitino.iceberg-rest.jdbc-password = postgres123
+    gravitino.iceberg-rest.jdbc-initialize = true
+
+    # Iceberg Storage Backend: MinIO S3 (S3FileIO)
+    gravitino.iceberg-rest.warehouse = s3://lakehouse/
+    gravitino.iceberg-rest.io-impl = org.apache.iceberg.aws.s3.S3FileIO
+    gravitino.iceberg-rest.s3-endpoint = http://minio.minio.svc.cluster.local:9000
+    gravitino.iceberg-rest.s3-access-key-id = admin
+    gravitino.iceberg-rest.s3-secret-access-key = password123
+    gravitino.iceberg-rest.s3-path-style-access = true
+    gravitino.iceberg-rest.s3-region = us-east-1

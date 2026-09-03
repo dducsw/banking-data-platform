@@ -1,0 +1,17 @@
+# Spark on K8s Operator Helm values for local dev
+# Repo: https://kubeflow.github.io/spark-operator
+# Chart: spark-operator/spark-operator
+
+sparkJobNamespace: "spark"
+
+webhook:
+  enable: true
+  port: 8080
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi

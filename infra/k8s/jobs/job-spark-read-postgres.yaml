@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: spark-read-postgres
+  namespace: spark
+  labels:
+    app: spark-read-postgres
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: spark-read-postgres
+    spec:
+      restartPolicy: Never
+      serviceAccountName: spark-service-account
+      containers:
+        - name: spark-job
+          image: banking/spark:4.1
+          imagePullPolicy: IfNotPresent
+          command: ["/opt/spark/bin/spark-submit"]
+          args:
+            - "--properties-file"
+            - "/opt/spark/conf/spark-defaults.conf"
+            - "/app/spark_read_postgres.py"
+          env:
+            - name: PG_HOST
+              value: "postgres.postgres.svc.cluster.local"
+            - name: PG_PORT
+              value: "5432"
+            - name: PG_DB
+              value: "banking"
+            - name: PG_USER
+              value: "postgres"
+            - name: PG_PASSWORD
+              value: "postgres123"
+          volumeMounts:
+            - name: spark-defaults
+              mountPath: /opt/spark/conf/spark-defaults.conf
+              subPath: spark-defaults.conf
+            - name: script-code
+              mountPath: /app/spark_read_postgres.py
+              subPath: spark_read_postgres.py
+      volumes:
+        - name: spark-defaults
+          configMap:
+            name: spark-defaults
+        - name: script-code
+          configMap:
+            name: spark-job-read-postgres

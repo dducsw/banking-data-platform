@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Full Base Platform
+resources:
+  # 1. Storage & DB Core
+  - minio
+  - postgres
+  - redis
+  - gravitino
+
+  # 2. Ingestion & Streaming
+  - kafka
+  - debezium
+
+  # 3. Compute & Query Engines
+  - spark
+  - trino
+  - clickhouse
+
+  # 4. Workflow, BI & Monitoring
+  - airflow
+  - superset
+  - prometheus
+  - grafana

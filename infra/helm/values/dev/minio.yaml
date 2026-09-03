@@ -1,0 +1,30 @@
+# Bitnami MinIO values for local dev (k3d Lakehouse Storage)
+# Repo: https://charts.bitnami.com/bitnami
+# Chart: bitnami/minio
+
+auth:
+  rootUser: "minioadmin"
+  rootPassword: "miniopassword"
+
+defaultBuckets: "lakehouse,raw,processed,curated,checkpoints,spark-logs"
+
+mode: standalone
+
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+service:
+  type: ClusterIP
+  ports:
+    api: 9000
+    console: 9001

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airflow-config
+  namespace: airflow
+  labels:
+    app.kubernetes.io/name: airflow
+    app.kubernetes.io/part-of: data-platform
+data:
+  AIRFLOW__CORE__EXECUTOR: "KubernetesExecutor"
+  AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+  AIRFLOW__CORE__LOAD_DEFAULT_CONNECTIONS: "False"
+  AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "False"
+  AIRFLOW__CORE__PARALLELISM: "32"
+  AIRFLOW__CORE__MAX_ACTIVE_TASKS_PER_DAG: "16"
+  AIRFLOW__CORE__MAX_ACTIVE_RUNS_PER_DAG: "4"
+  AIRFLOW__CORE__DEFAULT_TIMEZONE: "utc"
+
+  # Remote Logging with MinIO (S3 Lakehouse Storage)
+  AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+  AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "aws_s3_minio"
+  AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://lakehouse/airflow-logs"
+  AIRFLOW__LOGGING__ENCRYPT_S3_LOGS: "False"
+  AIRFLOW__LOGGING__LOGGING_LEVEL: "INFO"
+
+  # Kubernetes Executor Settings
+  AIRFLOW__KUBERNETES_EXECUTOR__NAMESPACE: "airflow"
+  AIRFLOW__KUBERNETES_EXECUTOR__WORKER_SERVICE_ACCOUNT_NAME: "airflow-sa"
+  AIRFLOW__KUBERNETES_EXECUTOR__WORKER_CONTAINER_REPOSITORY: "apache/airflow"
+  AIRFLOW__KUBERNETES_EXECUTOR__WORKER_CONTAINER_TAG: "3.1.3-python3.10"
+  AIRFLOW__KUBERNETES_EXECUTOR__DELETE_WORKER_PODS: "True"
+  AIRFLOW__KUBERNETES_EXECUTOR__WORKER_PODS_CREATION_BATCH_SIZE: "4"
+
+  # Scheduler & DAG Processor Performance
+  AIRFLOW__SCHEDULER__MIN_FILE_PROCESS_INTERVAL: "10"
+  AIRFLOW__DAG_PROCESSOR__REFRESH_INTERVAL: "30"
+  AIRFLOW__SCHEDULER__PARSING_PROCESSES: "2"
+
+  # API Server & Task Execution (Airflow 3)
+  AIRFLOW__CORE__EXECUTION_API_SERVER_URL: "http://airflow-webserver.airflow.svc.cluster.local:8088/execution/"
+  AIRFLOW__API__PORT: "8088"
+  AIRFLOW__API__BASE_URL: "http://airflow-webserver.airflow.svc.cluster.local:8088"
+  AIRFLOW__API__EXPOSE_CONFIG: "True"
+  AIRFLOW__API__EXPOSE_STACKTRACE: "True"

@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: spark-bronze-ingest
+  namespace: spark
+  labels:
+    app: spark-bronze-ingest
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: spark-bronze-ingest
+    spec:
+      restartPolicy: Never
+      serviceAccountName: spark-service-account
+      containers:
+        - name: spark-job
+          image: banking/spark:4.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AWS_REGION
+              value: "us-east-1"
+            - name: PG_HOST
+              value: "postgres.postgres.svc.cluster.local"
+            - name: PG_PORT
+              value: "5432"
+            - name: PG_DB
+              value: "banking"
+            - name: PG_USER
+              value: "postgres"
+            - name: PG_PASSWORD
+              value: "postgres123"
+            - name: MINIO_ENDPOINT
+              value: "http://minio.minio.svc.cluster.local:9000"
+            - name: MINIO_ACCESS_KEY
+              value: "admin"
+            - name: MINIO_SECRET_KEY
+              value: "password123"
+            - name: GRAVITINO_ICEBERG_REST_URI
+              value: "http://gravitino.gravitino.svc.cluster.local:9001/iceberg/"
+          command: ["/opt/spark/bin/spark-submit"]
+          args:
+            - "--properties-file"
+            - "/opt/spark/conf/spark-defaults.conf"
+            - "--py-files"
+            - "s3a://spark-logs/pipeline.zip"
+            - "/app/ingest_postgres.py"
+          volumeMounts:
+            - name: spark-defaults
+              mountPath: /opt/spark/conf/spark-defaults.conf
+              subPath: spark-defaults.conf
+            - name: script-code
+              mountPath: /app/ingest_postgres.py
+              subPath: ingest_postgres.py
+      volumes:
+        - name: spark-defaults
+          configMap:
+            name: spark-defaults
+        - name: script-code
+          configMap:
+            name: spark-job-bronze-ingest

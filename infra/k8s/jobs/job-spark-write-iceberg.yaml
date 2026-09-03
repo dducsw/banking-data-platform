@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: spark-write-iceberg
+  namespace: spark
+  labels:
+    app: spark-write-iceberg
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: spark-write-iceberg
+    spec:
+      restartPolicy: Never
+      serviceAccountName: spark-service-account
+      containers:
+        - name: spark-job
+          image: banking/spark:4.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AWS_REGION
+              value: "us-east-1"
+          command: ["/opt/spark/bin/spark-submit"]
+          args:
+            - "--properties-file"
+            - "/opt/spark/conf/spark-defaults.conf"
+            - "/app/spark_write_iceberg.py"
+          volumeMounts:
+            - name: spark-defaults
+              mountPath: /opt/spark/conf/spark-defaults.conf
+              subPath: spark-defaults.conf
+            - name: script-code
+              mountPath: /app/spark_write_iceberg.py
+              subPath: spark_write_iceberg.py
+      volumes:
+        - name: spark-defaults
+          configMap:
+            name: spark-defaults
+        - name: script-code
+          configMap:
+            name: spark-job-write-iceberg
